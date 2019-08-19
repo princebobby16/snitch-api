@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"incidentreport/app/index"
+	"incidentreport/db/database"
 	"log"
 	"net/http"
 
@@ -16,6 +17,21 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", index.Index)
 
+	// database connection
+	err := database.Connect()
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("Database connection established")
+
+	defer func() {
+		err := database.Disconnect()
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println("Database disconnected")
+	}()
+
 	// cors
 	origins := handlers.AllowedOrigins([]string{"*"})
 	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-EventType"})
@@ -27,12 +43,11 @@ func main() {
 		http.MethodOptions,
 	})
 
-
 	log.Println("starting http server on ", port)
 	log.Println("starting http server on ", port)
 
 	server := &http.Server{
-		Addr: fmt.Sprintf(":%v", port),
+		Addr:    fmt.Sprintf(":%v", port),
 		Handler: handlers.CORS(origins, headers, methods)(router),
 	}
 
