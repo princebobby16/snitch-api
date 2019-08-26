@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"incidentreport/app/incident"
 	"incidentreport/app/index"
 	"incidentreport/db/database"
 	"log"
@@ -16,6 +17,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", index.Index)
+	router.HandleFunc("/incident", incident.HandleImageUpload)
 
 	// database connection
 	err := database.Connect()
