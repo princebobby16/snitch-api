@@ -50,6 +50,7 @@ func SaveIncident(file multipart.File, filename string) (int, error) {
 
 	err = database.DBConn.QueryRow(saveDirectoryStatement, filepath, now).Scan(&lastInsertedId)
 	if err != nil {
+		log.Println(err)
 		return 0, err
 	}
 

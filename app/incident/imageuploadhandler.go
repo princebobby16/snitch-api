@@ -1,10 +1,35 @@
 package incident
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 )
+
+type successResponce struct {
+	Status string `json:"status"`
+	Data   struct {
+		ID int `json:"id"`
+	} `json:"data"`
+	Links struct {
+		Rel    string `json:"rel"`
+		Href   string `json:"href"`
+		Action string `json:"action"`
+	} `json:"links"`
+}
+
+type failResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		Image string `json:"image"`
+	} `json:"data"`
+}
+
+type errorResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"data"`
+}
 
 func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	// Parse our multipart form, 5 << 20 specifies a maximum
@@ -12,7 +37,18 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(5 << 20)
 	if err != nil {
 		log.Println(err)
-		// send error response
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(
+			failResponse{
+				Status: "fail",
+				Data: struct {
+					Image string `json:"image"`
+				}{
+					Image: "file size too large",
+				},
+			},
+		)
+		return
 	}
 
 	// FormFile returns the first file for the given key `image`
@@ -22,7 +58,12 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error Retrieving the File")
 		log.Println(err)
-		// send error response
+		_ = json.NewEncoder(w).Encode(
+			errorResponse{
+				Status:  "error",
+				Message: "could not read file",
+			})
+		return
 	}
 
 	defer func() {
@@ -36,13 +77,34 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("File Size: %+v\n", handler.Size)
 	fmt.Printf("MIME Header: %+v\n", handler.Header)
 
-	 id,err := SaveIncident(file, handler.Filename)
+	id, err := SaveIncident(file, handler.Filename)
 	if err != nil {
 		log.Println(err)
+		_ = json.NewEncoder(w).Encode(
+			errorResponse{
+				Status:  "error",
+				Message: "could not create incident",
+			},
+		)
+		return
 	}
 
-	 log.Println(id)
-
-	_, _ = fmt.Fprintf(w, "%d", id)
-
+	_ = json.NewEncoder(w).Encode(
+		successResponce{
+			Status: "success",
+			Data: struct {
+				ID int `json:"id"`
+			}{
+				ID: id,
+			},
+			Links: struct {
+				Rel    string `json:"rel"`
+				Href   string `json:"href"`
+				Action string `json:"action"`
+			}{
+				Rel:    "meta data",
+				Href:   "",
+				Action: "PUT",
+			},
+		})
 }
