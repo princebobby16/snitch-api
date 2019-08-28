@@ -77,7 +77,7 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("File Size: %+v\n", handler.Size)
 	fmt.Printf("MIME Header: %+v\n", handler.Header)
 
-	id, err := SaveIncident(file, handler.Filename)
+	id, err := SaveIncidentImage(file, handler.Filename)
 	if err != nil {
 		log.Println(err)
 		_ = json.NewEncoder(w).Encode(

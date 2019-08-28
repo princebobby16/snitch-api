@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func SaveIncident(file multipart.File, filename string) (int, error) {
+func SaveIncidentImage(file multipart.File, filename string) (int, error) {
 	filepath := "/home/naru/Pictures/snitch/" + filename
 	f, err := os.Create(filepath)
 	if err != nil {

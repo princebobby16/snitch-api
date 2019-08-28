@@ -6,6 +6,7 @@ import (
 	"incidentreport/app/incident"
 	"incidentreport/app/index"
 	"incidentreport/db/database"
+	"incidentreport/pkg/middleware"
 	"log"
 	"net/http"
 
@@ -52,6 +53,8 @@ func main() {
 		Addr:    fmt.Sprintf(":%v", port),
 		Handler: handlers.CORS(origins, headers, methods)(router),
 	}
+
+	router.Use(middleware.JSONMiddleware)
 
 	log.Fatal(server.ListenAndServe())
 }
