@@ -7,6 +7,7 @@ import (
 	"incidentreport/app/index"
 	"incidentreport/db/database"
 	"incidentreport/pkg/middleware"
+	"incidentreport/pkg/route"
 	"log"
 	"net/http"
 
@@ -16,9 +17,39 @@ import (
 func main() {
 	port := 9090
 
+	var routes = route.Routes{
+		route.Route{
+			Name:            "Index",
+			Method:          http.MethodGet,
+			Pattern:         "/",
+			HandlerFunction: index.Index,
+		},
+		route.Route{
+			Name:            "CreateIncident",
+			Method:          http.MethodPost,
+			Pattern:         "/incidents",
+			HandlerFunction: incident.HandleImageUpload,
+		},
+		route.Route{
+			Name:            "AddIncidentMetaData",
+			Method:          http.MethodPost,
+			Pattern:         "/incidents/{id}",
+			HandlerFunction: incident.HandleAddMetaData,
+		},
+	}
+
 	router := mux.NewRouter()
-	router.HandleFunc("/", index.Index)
-	router.HandleFunc("/incident", incident.HandleImageUpload)
+	for _, oneRoute := range routes {
+		var handler http.Handler
+
+		handler = oneRoute.HandlerFunction
+
+		router.
+			Methods(oneRoute.Method).
+			Path(oneRoute.Pattern).
+			Name(oneRoute.Name).
+			Handler(handler)
+	}
 
 	// database connection
 	err := database.Connect()

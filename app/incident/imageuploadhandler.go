@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-type successResponce struct {
+type incidentCreatedResponse struct {
 	Status string `json:"status"`
 	Data   struct {
 		ID int `json:"id"`
@@ -90,7 +90,7 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = json.NewEncoder(w).Encode(
-		successResponce{
+		incidentCreatedResponse{
 			Status: "success",
 			Data: struct {
 				ID int `json:"id"`
