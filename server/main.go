@@ -36,6 +36,12 @@ func main() {
 			Pattern:         "/incidents/{id}",
 			HandlerFunction: incident.HandleAddMetaData,
 		},
+		route.Route{
+			Name:            "GetOneIncident",
+			Method:          http.MethodGet,
+			Pattern:         "/incidents/{id}",
+			HandlerFunction: incident.HandleGetOneIncident,
+		},
 	}
 
 	router := mux.NewRouter()
