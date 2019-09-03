@@ -37,6 +37,12 @@ func main() {
 			HandlerFunction: incident.HandleAddMetaData,
 		},
 		route.Route{
+			Name:            "GetAllIncident",
+			Method:          http.MethodGet,
+			Pattern:         "/incidents",
+			HandlerFunction: incident.HandleGetAllIncidents,
+		},
+		route.Route{
 			Name:            "GetOneIncident",
 			Method:          http.MethodGet,
 			Pattern:         "/incidents/{id}",
