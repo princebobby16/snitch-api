@@ -12,7 +12,7 @@ func getAllIncidents() (incidents, error) {
 	var allIncidents incidents
 	// save directory in database
 	getAllIncidentsStatement := `
-		SELECT image_path, location, "time"
+		SELECT image_path, "time", location
 		FROM incidentreport.incident
 		`
 
@@ -34,12 +34,11 @@ func getAllIncidents() (incidents, error) {
 
 		var oneIncident incident
 
-		err = rows.Scan(&oneIncident.Image, &location, &oneIncident.MataData.Time)
+		err = rows.Scan(&oneIncident.Image, &oneIncident.MataData.Time, &location)
 		if err != nil {
 			log.Println(err)
-			return allIncidents, nil
-
-			// handle null location error
+			allIncidents=append(allIncidents, oneIncident)
+			continue
 		}
 
 		s := strings.Split(location, ",")
