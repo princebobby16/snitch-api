@@ -13,7 +13,8 @@ func getAllIncidents() (incidents, error) {
 	// save directory in database
 	getAllIncidentsStatement := `
 		SELECT image_path, location, "time"
-		FROM incidentreport.incident`
+		FROM incidentreport.incident
+		`
 
 	rows, err := database.DBConn.Query(getAllIncidentsStatement)
 	if err != nil {
@@ -37,6 +38,8 @@ func getAllIncidents() (incidents, error) {
 		if err != nil {
 			log.Println(err)
 			return allIncidents, nil
+
+			// handle null location error
 		}
 
 		s := strings.Split(location, ",")
