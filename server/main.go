@@ -32,7 +32,7 @@ func main() {
 		},
 		route.Route{
 			Name:            "AddIncidentMetaData",
-			Method:          http.MethodPost,
+			Method:          http.MethodPut,
 			Pattern:         "/incidents/{id}",
 			HandlerFunction: incident.HandleAddMetaData,
 		},
