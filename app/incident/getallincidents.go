@@ -37,7 +37,7 @@ func getAllIncidents() (incidents, error) {
 		err = rows.Scan(&oneIncident.Image, &oneIncident.MataData.Time, &location)
 		if err != nil {
 			log.Println(err)
-			allIncidents=append(allIncidents, oneIncident)
+			allIncidents = append(allIncidents, oneIncident)
 			continue
 		}
 

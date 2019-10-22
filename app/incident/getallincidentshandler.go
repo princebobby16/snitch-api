@@ -2,6 +2,7 @@ package incident
 
 import (
 	"encoding/json"
+	"incidentreport/pkg/response"
 	"log"
 	"net/http"
 )
@@ -18,12 +19,41 @@ func HandleGetAllIncidents(w http.ResponseWriter, _ *http.Request) {
 	incidents, err := getAllIncidents()
 	if err != nil {
 		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		err = json.NewEncoder(w).Encode(
+			response.ErrorResponse{
+				Status:  "Error",
+				Message: "Unable to get incident",
+			},
+		)
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		return
 	}
 
-	_ = json.NewEncoder(w).Encode(
+	w.WriteHeader(http.StatusAccepted)
+	err = json.NewEncoder(w).Encode(
 		getAllIncidentResponse{
-			Status: "succes",
+			Status: "success",
 			Data:   incidents,
-		})
+		},
+	)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		err := json.NewEncoder(w).Encode(
+			response.ErrorResponse{
+				Status:  "Error",
+				Message: "Internal server error",
+			},
+		)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		return
+	}
 }

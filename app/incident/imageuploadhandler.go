@@ -38,7 +38,7 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(
+		err = json.NewEncoder(w).Encode(
 			failResponse{
 				Status: "fail",
 				Data: struct {
@@ -48,6 +48,10 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 				},
 			},
 		)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		return
 	}
 
@@ -58,11 +62,16 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error Retrieving the File")
 		log.Println(err)
-		_ = json.NewEncoder(w).Encode(
+		w.WriteHeader(http.StatusInternalServerError)
+		err = json.NewEncoder(w).Encode(
 			errorResponse{
 				Status:  "error",
 				Message: "could not read file",
 			})
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		return
 	}
 
@@ -80,17 +89,23 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	id, err := SaveIncidentImage(file, handler.Filename)
 	if err != nil {
 		log.Println(err)
-		_ = json.NewEncoder(w).Encode(
+		w.WriteHeader(http.StatusInternalServerError)
+		err = json.NewEncoder(w).Encode(
 			errorResponse{
 				Status:  "error",
 				Message: "could not create incident",
 			},
 		)
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(
+	err = json.NewEncoder(w).Encode(
 		incidentCreatedResponse{
 			Status: "success",
 			Data: struct {
@@ -108,4 +123,19 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 				Action: "PUT",
 			},
 		})
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		err = json.NewEncoder(w).Encode(
+			errorResponse{
+				Status:  "Error",
+				Message: "Internal server error",
+			},
+		)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		return
+	}
 }

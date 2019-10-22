@@ -3,6 +3,7 @@ package incident
 import (
 	"encoding/json"
 	"google.golang.org/genproto/googleapis/type/latlng"
+	"incidentreport/pkg/response"
 	"incidentreport/pkg/stringconv"
 	"log"
 	"net/http"
@@ -23,6 +24,13 @@ type getOneIncidentResponse struct {
 	Data   incident `json:"data"`
 }
 
+type getIdFailResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		ID string `json:"id"`
+	} `json:"data"`
+}
+
 func HandleGetOneIncident(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
@@ -31,17 +39,55 @@ func HandleGetOneIncident(w http.ResponseWriter, r *http.Request) {
 	id, err := stringconv.StrtoI(incidetID)
 	if err != nil {
 		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		err := json.NewEncoder(w).Encode(response.ErrorResponse{
+			Status:  "Error",
+			Message: "Unable to complete request",
+		})
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		return
 	}
 
 	oneIncident, err := getOneIncident(id)
 	if err != nil {
 		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		err := json.NewEncoder(w).Encode(getIdFailResponse{
+			Status: "Fail",
+			Data: struct {
+				ID string `json:"id"`
+			}{
+				ID: "Invalid ID",
+			},
+		})
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		return
 	}
 
-	_ = json.NewEncoder(w).Encode(getOneIncidentResponse{
+	err = json.NewEncoder(w).Encode(getOneIncidentResponse{
 		Status: "success",
 		Data:   oneIncident,
 	})
+
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		err := json.NewEncoder(w).Encode(
+			response.ErrorResponse{
+				Status:  "Error",
+				Message: "Unable to complete request",
+			},
+		)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		return
+	}
 }

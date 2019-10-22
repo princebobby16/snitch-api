@@ -2,12 +2,15 @@ package index
 
 import (
 	"encoding/json"
+	"fmt"
+	"incidentreport/pkg/response"
+	"log"
 	"net/http"
 )
 
-func Index(w http.ResponseWriter, _ *http.Request){
+func Index(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(
+	err := json.NewEncoder(w).Encode(
 		Alive{
 			Alive:       true,
 			Author:      "Benjy Asiamah-Koranteng",
@@ -15,5 +18,22 @@ func Index(w http.ResponseWriter, _ *http.Request){
 			Environment: "development",
 		},
 	)
+
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		err = json.NewEncoder(w).Encode(
+			response.ErrorResponse{
+				Status:  fmt.Sprintf("%s", http.StatusInternalServerError),
+				Message: "Internal server error",
+			},
+		)
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		return
+	}
 
 }
